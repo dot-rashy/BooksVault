@@ -147,7 +147,7 @@ Open the local address displayed by Flask in your terminal. If the application u
 http://127.0.0.1:5000
 ```
 
-## 🗄️ Database Design
+##  Database Design
 
 BooksVault uses PostgreSQL with a schema named `bookshop`.
 
