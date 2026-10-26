@@ -1,0 +1,73 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {{ "Add Customer" if mode == "add" else "Edit Customer" }} | BooksVault
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">CUSTOMER DIRECTORY</p>
+        <h1>{{ "Add Customer" if mode == "add" else "Edit Customer" }}</h1>
+        <p class="subtitle">Enter the customer's details below.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="book-form">
+        <label for="cust_name">Customer Name *</label>
+        <input
+            id="cust_name"
+            name="cust_name"
+            type="text"
+            maxlength="100"
+            required
+            value="{{ customer.get('cust_name', '') }}"
+        >
+
+        <label for="cust_phone">Phone</label>
+        <input
+            id="cust_phone"
+            name="cust_phone"
+            type="tel"
+            maxlength="20"
+            value="{{ customer.get('cust_phone', '') }}"
+        >
+
+        <label for="cust_email">Email</label>
+        <input
+            id="cust_email"
+            name="cust_email"
+            type="email"
+            maxlength="150"
+            value="{{ customer.get('cust_email', '') }}"
+        >
+
+        <label for="cust_addr">Address</label>
+        <textarea
+            id="cust_addr"
+            name="cust_addr"
+            rows="4"
+        >{{ customer.get('cust_addr', '') }}</textarea>
+
+        <div class="form-actions">
+            <button type="submit" class="primary-button">
+                {{ "Save Customer" if mode == "add" else "Update Customer" }}
+            </button>
+
+            <a href="{{ url_for('customers_page') }}" class="secondary-button">
+                Cancel
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

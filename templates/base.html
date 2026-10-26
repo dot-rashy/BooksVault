@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BooksVault{% endblock %}</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a class="brand" href="/">
+                <img
+                    src="{{ url_for('static', filename='bookshop.png') }}"
+                    alt="BooksVault bookshop"
+                    class="brand-icon"
+                />
+                <span>BooksVault<small>BOOKSHOP MANAGEMENT</small></span>
+            </a>
+
+            <p class="nav-heading">WORKSPACE</p>
+            <a class="nav-link active" href="/">▦ &nbsp; Dashboard</a>
+            <a class="nav-link" href="{{ url_for('books_page') }}">▤ &nbsp; Books</a>
+            <a class="nav-link" href="{{ url_for('customers_page') }}">♙ &nbsp; Customers</a>
+            <a class="nav-link" href="{{ url_for('dealers_page') }}">♧ &nbsp; Dealers</a>
+            <a class="nav-link" href="{{ url_for('orders_page') }}">▣ &nbsp; Orders</a>
+
+            <div class="sidebar-bottom">
+                <span class="status-dot"></span>
+                PostgreSQL connected
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <span>Bookshop / <strong>Dashboard</strong></span>
+                <span class="admin-label">Administrator</span>
+            </header>
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

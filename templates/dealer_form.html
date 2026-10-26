@@ -1,0 +1,68 @@
+
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Dealer' if dealer else 'Add Dealer' }} | BooksVault{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">SUPPLIER MANAGEMENT</p>
+        <h1>{{ 'Edit Dealer' if dealer else 'Add Dealer' }}</h1>
+        <p class="subtitle">Enter the dealer's contact details.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form
+        method="POST"
+        class="book-form"
+        action="{{ url_for('edit_dealer', dealer_id=dealer[0]) if dealer else url_for('add_dealer') }}"
+    >
+        <label for="deal_name">Dealer Name *</label>
+        <input
+            type="text"
+            id="deal_name"
+            name="deal_name"
+            maxlength="150"
+            value="{{ dealer[1] if dealer else request.form.get('deal_name', '') }}"
+            required
+        >
+
+        <label for="deal_phone">Phone</label>
+        <input
+            type="text"
+            id="deal_phone"
+            name="deal_phone"
+            value="{{ dealer[2] if dealer else request.form.get('deal_phone', '') }}"
+        >
+
+        <label for="deal_email">Email</label>
+        <input
+            type="email"
+            id="deal_email"
+            name="deal_email"
+            value="{{ dealer[3] if dealer else request.form.get('deal_email', '') }}"
+        >
+
+        <label for="deal_addr">Address</label>
+        <textarea
+            id="deal_addr"
+            name="deal_addr"
+            rows="3"
+        >{{ dealer[4] if dealer else request.form.get('deal_addr', '') }}</textarea>
+
+        <button type="submit" class="primary-button">
+            {{ 'Update Dealer' if dealer else 'Save Dealer' }}
+        </button>
+
+        <a href="{{ url_for('dealers_page') }}">Cancel</a>
+    </form>
+</section>
+{% endblock %}

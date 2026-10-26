@@ -1,0 +1,297 @@
+
+{% extends "base.html" %}
+{% block title %}Create Order | BooksVault{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">SALES MANAGEMENT</p>
+        <h1>Create Order</h1>
+        <p class="subtitle">Choose a customer and add books to their order.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST"
+          action="{{ url_for('add_order') }}"
+          class="book-form"
+          id="order-form">
+
+        <label for="customer_id">Customer *</label>
+        <select id="customer_id" name="customer_id" required>
+            <option value="">Select a customer</option>
+            {% for customer in customers %}
+                <option value="{{ customer[0] }}"
+                    {% if request.form.get('customer_id') == customer[0]|string %}selected{% endif %}>
+                    {{ customer[1] }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <div class="order-section-heading">
+            <div>
+                <h2>Order Items</h2>
+                <p>Choose books and enter their quantities.</p>
+            </div>
+
+            <button type="button"
+                    class="primary-button"
+                    id="add-book-btn">
+                + Add Book
+            </button>
+        </div>
+
+        <div id="order-items"></div>
+
+        <p id="empty-items-message">
+            No books added yet. Click “Add Book” to begin.
+        </p>
+
+        <div class="order-total-panel">
+            <span>Estimated Total</span>
+            <strong>₹<span id="order-total">0.00</span></strong>
+        </div>
+
+        <button type="submit" class="primary-button">
+            Save Order
+        </button>
+
+        <a href="{{ url_for('orders_page') }}">Cancel</a>
+    </form>
+</section>
+
+<script id="books-data" type="application/json">
+[
+    {% for book in books %}
+    {
+        "id": {{ book[0] | tojson }},
+        "title": {{ book[1] | tojson }},
+        "price": {{ book[2] | float }},
+        "stock": {{ book[3] }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+]
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const books = JSON.parse(
+        document.getElementById("books-data").textContent
+    );
+
+    const container = document.getElementById("order-items");
+    const addButton = document.getElementById("add-book-btn");
+    const totalDisplay = document.getElementById("order-total");
+    const emptyMessage = document.getElementById("empty-items-message");
+    const orderForm = document.getElementById("order-form");
+
+    function updateTotal() {
+        let total = 0;
+
+        container.querySelectorAll(".order-item-row").forEach(function (row) {
+            const select = row.querySelector(".book-select");
+            const quantityInput = row.querySelector(".book-quantity");
+
+            const book = books.find(function (item) {
+                return String(item.id) === select.value;
+            });
+
+            if (book) {
+                const quantity = Number(quantityInput.value) || 0;
+                total += book.price * quantity;
+            }
+        });
+
+        totalDisplay.textContent = total.toFixed(2);
+
+        emptyMessage.style.display =
+            container.children.length > 0 ? "none" : "block";
+    }
+
+    function refreshBookOptions() {
+        const rows = Array.from(
+            container.querySelectorAll(".order-item-row")
+        );
+
+        const selects = rows.map(function (row) {
+            return row.querySelector(".book-select");
+        });
+
+        const selectedIds = selects
+            .map(function (select) {
+                return select.value;
+            })
+            .filter(Boolean);
+
+        selects.forEach(function (select) {
+            Array.from(select.options).forEach(function (option) {
+                if (!option.value) return;
+
+                option.disabled =
+                    selectedIds.includes(option.value) &&
+                    option.value !== select.value;
+            });
+        });
+
+        addButton.disabled = rows.length >= books.length;
+    }
+
+    function addBookRow() {
+        const currentRows =
+            container.querySelectorAll(".order-item-row").length;
+
+        if (currentRows >= books.length) return;
+
+        const row = document.createElement("div");
+        row.className = "order-item-row";
+
+        const top = document.createElement("div");
+        top.className = "order-item-top";
+
+        const bookLabel = document.createElement("label");
+        bookLabel.textContent = "Book";
+
+        const select = document.createElement("select");
+        select.name = "isbn_id";
+        select.className = "book-select";
+        select.required = true;
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select a book";
+        select.appendChild(placeholder);
+
+        books.forEach(function (book) {
+            const option = document.createElement("option");
+            option.value = String(book.id);
+            option.textContent =
+                `${book.title} — ₹${book.price.toFixed(2)} (Stock: ${book.stock})`;
+
+            select.appendChild(option);
+        });
+
+        bookLabel.appendChild(select);
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "remove-book-btn";
+        removeButton.textContent = "Remove";
+
+        top.appendChild(bookLabel);
+        top.appendChild(removeButton);
+
+        const quantityArea = document.createElement("div");
+        quantityArea.className = "order-quantity-area";
+
+        const quantityLabel = document.createElement("label");
+        quantityLabel.textContent = "Quantity";
+
+        const quantity = document.createElement("input");
+        quantity.type = "number";
+        quantity.name = "quantity";
+        quantity.className = "book-quantity";
+        quantity.min = "1";
+        quantity.value = "1";
+        quantity.required = true;
+
+        quantityLabel.appendChild(quantity);
+
+        const stockInfo = document.createElement("p");
+        stockInfo.className = "item-stock-info";
+        stockInfo.textContent =
+            "Select a book to see available stock.";
+
+        quantityArea.appendChild(quantityLabel);
+        quantityArea.appendChild(stockInfo);
+
+        row.appendChild(top);
+        row.appendChild(quantityArea);
+        container.appendChild(row);
+
+        select.addEventListener("change", function () {
+            const book = books.find(function (item) {
+                return String(item.id) === select.value;
+            });
+
+            if (book) {
+                quantity.max = String(book.stock);
+                quantity.value = "1";
+
+                stockInfo.textContent =
+                    `Available stock: ${book.stock} · Price: ₹${book.price.toFixed(2)}`;
+            } else {
+                quantity.removeAttribute("max");
+                stockInfo.textContent =
+                    "Select a book to see available stock.";
+            }
+
+            refreshBookOptions();
+            updateTotal();
+        });
+
+        quantity.addEventListener("input", updateTotal);
+
+        removeButton.addEventListener("click", function () {
+            row.remove();
+            refreshBookOptions();
+            updateTotal();
+        });
+
+        refreshBookOptions();
+        updateTotal();
+    }
+
+    orderForm.addEventListener("submit", function (event) {
+        const rows = container.querySelectorAll(".order-item-row");
+
+        if (rows.length === 0) {
+            event.preventDefault();
+            alert("Please add at least one book.");
+            return;
+        }
+
+        for (const row of rows) {
+            const select = row.querySelector(".book-select");
+            const quantity = row.querySelector(".book-quantity");
+
+            const book = books.find(function (item) {
+                return String(item.id) === select.value;
+            });
+
+            const quantityValue = Number(quantity.value);
+
+            if (
+                !book ||
+                !quantity.value ||
+                !Number.isInteger(quantityValue) ||
+                quantityValue < 1 ||
+                quantityValue > book.stock
+            ) {
+                event.preventDefault();
+                alert(
+                    "Please select a valid book and enter a whole-number quantity within available stock."
+                );
+                return;
+            }
+        }
+    });
+
+    addButton.addEventListener("click", addBookRow);
+
+    if (books.length === 0) {
+        addButton.disabled = true;
+        emptyMessage.textContent = "No books are currently in stock.";
+    } else {
+        addBookRow();
+    }
+});
+</script>
+{% endblock %}

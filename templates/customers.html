@@ -1,0 +1,95 @@
+
+{% extends "base.html" %}
+{% block title %}Customers | BooksVault{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">CUSTOMER DIRECTORY</p>
+        <h1>Customers</h1>
+        <p class="subtitle">Manage your bookshop customers.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="inventory-header">
+        <div>
+            <h2>All Customers</h2>
+            <p>{{ customers|length }} customer(s) found</p>
+        </div>
+
+        <div class="books-actions">
+            <form method="GET" action="{{ url_for('customers_page') }}"
+                  class="search-form">
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search name, phone or email..."
+                    value="{{ search }}"
+                >
+                <button type="submit" class="primary-button">Search</button>
+            </form>
+
+            <a href="{{ url_for('add_customer') }}" class="primary-button">
+                + Add Customer
+            </a>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ customer[0] }}</td>
+                    <td><strong>{{ customer[1] }}</strong></td>
+                    <td>{{ customer[2] or '-' }}</td>
+                    <td>{{ customer[3] or '-' }}</td>
+                    <td>{{ customer[4] or '-' }}</td>
+                    <td class="book-row-actions">
+                        <a
+                            class="edit-link"
+                            href="{{ url_for('edit_customer', customer_id=customer[0]) }}"
+                        >Edit</a>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_customer', customer_id=customer[0]) }}"
+                            onsubmit="return confirm('Delete this customer?');"
+                            class="delete-form"
+                        >
+                            <button type="submit" class="delete-button">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">No customers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

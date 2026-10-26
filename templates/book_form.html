@@ -1,0 +1,110 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {{ "Add Book" if mode == "add" else "Edit Book" }} | BooksVault
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">YOUR COLLECTION</p>
+        <h1>{{ "Add a New Book " if mode == "add" else "Edit Book ✏️" }}</h1>
+        <p class="subtitle">Enter the book details below.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="book-form">
+        {% if mode == "add" %}
+        <label for="isbn_id">ISBN / ID *</label>
+        <input
+            id="isbn_id"
+            name="isbn_id"
+            type="number"
+            min="1"
+            required
+            value="{{ book.get('isbn_id', '') }}"
+        >
+        {% else %}
+        <p><strong>ISBN / ID:</strong> {{ book.get('isbn_id', '') }}</p>
+        {% endif %}
+
+        <label for="title">Book Title *</label>
+        <input
+            id="title"
+            name="title"
+            type="text"
+            maxlength="255"
+            required
+            value="{{ book.get('title', '') }}"
+        >
+
+        <label for="author_nm">Author</label>
+        <input
+            id="author_nm"
+            name="author_nm"
+            type="text"
+            maxlength="255"
+            value="{{ book.get('author_nm', '') }}"
+        >
+
+        <label for="publisher_nm">Publisher</label>
+        <input
+            id="publisher_nm"
+            name="publisher_nm"
+            type="text"
+            maxlength="255"
+            value="{{ book.get('publisher_nm', '') }}"
+        >
+
+        <label for="genre">Genre</label>
+        <input
+            id="genre"
+            name="genre"
+            type="text"
+            maxlength="255"
+            value="{{ book.get('genre', '') }}"
+        >
+
+        <label for="price">Price (₹) *</label>
+        <input
+            id="price"
+            name="price"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            value="{{ book.get('price', '') }}"
+        >
+
+        <label for="stock">Stock *</label>
+        <input
+            id="stock"
+            name="stock"
+            type="number"
+            min="0"
+            step="1"
+            required
+            value="{{ book.get('stock', 0) }}"
+        >
+
+        <div class="form-actions">
+            <button type="submit" class="primary-button">
+                {{ "Save Book" if mode == "add" else "Update Book" }}
+            </button>
+            <a href="{{ url_for('books_page') }}" class="secondary-button">
+                Cancel
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

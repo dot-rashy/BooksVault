@@ -1,0 +1,109 @@
+
+{% extends "base.html" %}
+{% block title %}Books | BooksVault{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">YOUR COLLECTION</p>
+        <h1>Books Library</h1>
+        <p class="subtitle">Manage and explore your book collection.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="inventory-header">
+        <div>
+            <h2>All Books</h2>
+            <p>{{ books|length }} book(s) found</p>
+        </div>
+
+        <div class="books-actions">
+            <form method="GET" action="{{ url_for('books_page') }}"
+                  class="search-form">
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search title, author, genre..."
+                    value="{{ search }}"
+                >
+                <button type="submit" class="primary-button">
+                    Search
+                </button>
+            </form>
+
+            <a href="{{ url_for('add_book') }}" class="primary-button">
+                + Add Book
+            </a>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>ISBN / ID</th>
+                    <th>Book Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{ book[0] }}</td>
+                    <td><strong>{{ book[1] }}</strong></td>
+                    <td>{{ book[2] or '-' }}</td>
+                    <td>{{ book[3] or '-' }}</td>
+                    <td>₹{{ "%.2f"|format(book[4]) }}</td>
+                    <td>{{ book[5] }}</td>
+
+                    <td class="book-row-actions">
+                        <a
+                            href="{{ url_for('edit_book', isbn_id=book[0]) }}"
+                            class="edit-link"
+                        >
+                            Edit
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_book', isbn_id=book[0]) }}"
+                            onsubmit="return confirm('Are you sure you want to delete this book?');"
+                            class="delete-form"
+                        >
+                            <button type="submit" class="delete-button">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="7">
+                        No books found. Try another search or add a new book.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+{% endblock %}

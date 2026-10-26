@@ -1,0 +1,98 @@
+
+{% extends "base.html" %}
+{% block title %}Dealers | BooksVault{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">YOUR SUPPLIERS</p>
+        <h1>Dealers</h1>
+        <p class="subtitle">Manage your book suppliers.</p>
+    </div>
+</section>
+
+<section class="inventory-section">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="inventory-header">
+        <div>
+            <h2>All Dealers</h2>
+            <p>{{ dealers|length }} dealer(s) found</p>
+        </div>
+
+        <div class="books-actions">
+            <form method="GET" action="{{ url_for('dealers_page') }}"
+                  class="search-form">
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search name, phone, email..."
+                    value="{{ search }}"
+                >
+                <button type="submit" class="primary-button">Search</button>
+            </form>
+
+            <a href="{{ url_for('add_dealer') }}" class="primary-button">
+                + Add Dealer
+            </a>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Dealer Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for dealer in dealers %}
+                <tr>
+                    <td>{{ dealer[0] }}</td>
+                    <td><strong>{{ dealer[1] }}</strong></td>
+                    <td>{{ dealer[2] or '-' }}</td>
+                    <td>{{ dealer[3] or '-' }}</td>
+                    <td>{{ dealer[4] or '-' }}</td>
+                    <td class="book-row-actions">
+                        <a
+                            href="{{ url_for('edit_dealer', dealer_id=dealer[0]) }}"
+                            class="edit-link"
+                        >Edit</a>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('delete_dealer', dealer_id=dealer[0]) }}"
+                            onsubmit="return confirm('Delete this dealer?');"
+                            class="delete-form"
+                        >
+                            <button type="submit" class="delete-button">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">
+                        No dealers found. Add your first dealer!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

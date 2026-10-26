@@ -1,0 +1,114 @@
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard | BooksVault{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">OVERVIEW</p>
+        <h1>Welcome to BooksVault </h1>
+        <p class="subtitle">Your bookshop at a glance.</p>
+    </div>
+    <a class="primary-button" href="#inventory">View inventory ↗</a>
+   <div class="book-decoration">
+    <img
+        src="{{ url_for('static', filename='bookshopdesign..png') }}"
+        alt="Illustration of a cute bookshop"
+        class="bookshop-illustration"
+    >
+</div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Total books</span>
+            <span class="stat-icon purple">▤</span>
+        </div>
+        <h2>{{ total_books }}</h2>
+        <p>Books in your catalogue</p>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Customers</span>
+            <span class="stat-icon green">♙</span>
+        </div>
+        <h2>{{ total_customers }}</h2>
+        <p>Registered customers</p>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Total orders</span>
+            <span class="stat-icon orange">▣</span>
+        </div>
+        <h2>{{ total_orders }}</h2>
+        <p>Orders recorded</p>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-top">
+            <span>Low stock</span>
+            <span class="stat-icon red">!</span>
+        </div>
+        <h2>{{ low_stock }}</h2>
+        <p>Books with 5 or fewer copies</p>
+    </article>
+</section>
+
+<section class="inventory-section" id="inventory">
+    <div class="section-heading">
+        <div>
+            <h2>Book inventory</h2>
+            <p>Your current catalogue from PostgreSQL</p>
+        </div>
+        <span class="record-count">{{ books|length }} records shown</span>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ISBN</th>
+                    <th>BOOK DETAILS</th>
+                    <th>GENRE</th>
+                    <th>PRICE</th>
+                    <th>STOCK</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td class="isbn">{{ book[0] }}</td>
+                    <td>
+                        <strong>{{ book[1] }}</strong>
+                        <span class="author">{{ book[2] or 'Unknown author' }}</span>
+                    </td>
+                    <td>{{ book[3] or 'Uncategorized' }}</td>
+                    <td class="price">₹{{ "%.2f"|format(book[4]) }}</td>
+                    <td>
+                        {% if book[5] <= 5 %}
+                            <span class="stock-badge low">{{ book[5] }} left</span>
+                        {% else %}
+                            <span class="stock-badge available">{{ book[5] }} available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        No books found in the catalogue.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<footer class="page-footer">
+    BooksVault · Bookshop Management System
+</footer>
+{% endblock %}
